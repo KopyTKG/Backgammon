@@ -1,7 +1,7 @@
 from Core.stack import Stack
 
 class Stone():
-    def __init__(self, currentLocation, color: String):
+    def __init__(self, currentLocation, color: str):
         self._location = currentLocation
         self._color = color
         
