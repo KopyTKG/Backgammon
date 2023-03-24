@@ -1,23 +1,24 @@
-from Classes.dice import Dice
-from Classes.stone import Stone
+from Classes.backgammon import BackGammon
 from Core.ui import FPS
 import sys, pygame, os, yaml
 
-class Backgammon():
+class UI():
     def __init__(self):
         pygame.init()
         
+        self._modes = {"fullscreen": (pygame.HWSURFACE | pygame.FULLSCREEN), "bordless": pygame.NOFRAME}
         with open(f"{os.getcwd()}/Configs/master.yml", "r") as opened:
             self._config = yaml.safe_load(opened)
 
-        self._modes = {"fullscreen": (pygame.HWSURFACE | pygame.FULLSCREEN), "bordeless": pygame.NOFRAME}
+        self.backgammon = Backgammon()
+        
         self._bg = self._config["background"][0], self._config["background"][1], self._config["background"][2]
-        self._flags = self._modes["fullscreen"]
+        self._flags = self._modes["bordless"]
         self._res = (self._config["resolution"][0],self._config["resolution"][1])
         self._color = (125,175,0)
+        self._border = {"x": 20, "y":20}
         self._screen = pygame.display.set_mode(self._res, flags=self._flags, vsync=0)
         self._screen.fill(self._bg)
-        self._dices = [Dice(), Dice()]
         self._currentRoll = []
         self._assetsPath = f"{os.getcwd()}/Assets/Images/"
         self._field = pygame.image.load(f"{self._assetsPath}field.png")
@@ -29,27 +30,32 @@ class Backgammon():
         self._diceSize = 100
         self._font = pygame.font.SysFont(f"{os.getcwd()}/Assets/Fonts/NotoSans-Regular.ttf", 48)
 
-    def _diceRoll(self) -> None:
-        self._currentRoll = []
-        for dice in self._dices:
-            self._currentRoll.append(dice.throw())
+
+
 
     def _render(self):
         if len(self._currentRoll) > 0:
-            indent = -30
+            lenght = len(self._currentRoll) / 2
+            position = 0
+            if lenght >= 2:
+                indent = [(self._res[0]//2)+x for x in [-150,-50,50,150]]
+            else:
+                indent = [(self._res[0]//2)+x for x in [-50,50]]
+
             for roll in self._currentRoll:
                 self._screen.blit(
                     self._font.render(str(roll), True, self._color)
-                    ,(self._res[0] // 2 + indent, 20))
-                indent *= -1
+                    ,(indent[position], self._border["x"]))
+                position +=1
         
         self._screen.blit(
             self._field,
             (self._res[0]//2 - (self._fieldSize[0] //2), self._res[1]//2 - (self._fieldSize[1] // 2))
         )
 
+
     def _renderDice(self, dice):
-        self._screen.blit(dice, (self._res[0] - self._diceSize-20,20))
+        self._screen.blit(dice, (self._res[0] - self._diceSize-self._border["x"], self._border["y"]))
 
     def run(self):
         fps = FPS((0,0,255))
@@ -73,12 +79,12 @@ class Backgammon():
                         self._screen.blit(self._stoneIMG[0], (self._res[0] // 2 + x - 37.5 ,self._res[1]//2 + y - 37.5))
 
 
-            if self._mousePosition[0] > self._res[0] - self._diceSize - 20 and self._mousePosition[0] < self._res[0] - 20:
-                if self._mousePosition[1] > 20 and self._mousePosition[1] < 20 + self._diceSize:
+            if self._mousePosition[0] > self._res[0] - self._diceSize - self._border["x"] and self._mousePosition[0] < self._res[0] - self._border["y"]:
+                if self._mousePosition[1] > self._border["x"] and self._mousePosition[1] < self._border["y"] + self._diceSize:
                     self._renderDice(self._diceIMG[1])
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
                     if pygame.mouse.get_pressed()[0] and not self._rolled:
-                        self._diceRoll()
+                        self._currentRoll = self.backgammon.diceRoll()
                         self._rolled = True
                 else:
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -95,6 +101,6 @@ class Backgammon():
 
 
 
-BK = Backgammon()
+BK = UI()
 if __name__ == "__main__":
     BK.run()
