@@ -1,0 +1,4 @@
+# Screen resolution
+resolution: [1920, 1080]
+#Background color ('White')
+background: [255, 255, 255]
