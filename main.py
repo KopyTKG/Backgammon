@@ -1,14 +1,19 @@
 from Classes.dice import Dice
 from Classes.stone import Stone
 from Core.ui import FPS
-import sys, pygame, os
- 
+import sys, pygame, os, yaml
+
 class Backgammon():
     def __init__(self):
         pygame.init()
-        self._bg = 255,255,255
-        self._flags = pygame.HWSURFACE # | pygame.NOFRAME # | pygame.FULLSCREEN 
-        self._res = (1920,1080)
+        
+        with open(f"{os.getcwd()}/Configs/master.yml", "r") as opened:
+            self._config = yaml.safe_load(opened)
+
+        self._modes = {"fullscreen": (pygame.HWSURFACE | pygame.FULLSCREEN), "bordeless": pygame.NOFRAME}
+        self._bg = self._config["background"][0], self._config["background"][1], self._config["background"][2]
+        self._flags = self._modes["fullscreen"]
+        self._res = (self._config["resolution"][0],self._config["resolution"][1])
         self._color = (125,175,0)
         self._screen = pygame.display.set_mode(self._res, flags=self._flags, vsync=0)
         self._screen.fill(self._bg)
