@@ -2,22 +2,22 @@ from typing import Any, List
 
 class Stack:
     def __init__(self, start=[]):
-        self.__memory = start
+        self._memory = start
 
     def push(self, item) -> None:
-        self.__memory.append(item)
+        self._memory.append(item)
 
     def pop(self) -> Any:
-        return self.__memory.pop(len(self.__memory)-1)
+        return self._memory.pop(len(self._memory)-1)
 
     def peek(self) -> Any:
-        return self.__memory[-1]
+        return self._memory[-1]
 
     def isEmpty(self) -> bool:
-        return not self.__memory
+        return not self._memory
 
     def __len__(self) -> int:
-        return len(self.__memory)
+        return len(self._memory)
     
     def __str__(self) -> str:
-        return str(self.__memory)
+        return str(self._memory)

@@ -19,3 +19,7 @@ class Stone():
     @property
     def locations(self):
         return self._locationMemory
+    
+    def __str__(self) -> str:
+        color = "white" if self._color else "black"
+        return f"(position={self._location},color={color})"
