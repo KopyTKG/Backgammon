@@ -73,6 +73,10 @@ class Backgammon:
         self._foreplay()
         print(self.getPossibleMoves())
 
+    
+    @property
+    def board(self) -> List:
+        return self._spikes
 
     @property
     def moves(self) -> List:
