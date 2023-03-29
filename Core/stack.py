@@ -8,7 +8,7 @@ class Stack:
         self._memory.append(item)
 
     def pop(self) -> Any:
-        return self._memory.pop(len(self._memory)-1)
+        return self._memory.pop(-1)
 
     def peek(self) -> Any:
         return self._memory[-1]

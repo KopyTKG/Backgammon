@@ -1,23 +1,22 @@
-from Core.stack import Stack
 from Classes.stone import Stone
 from typing import List
 
 class Spike:
-    def __init__(self, stones=Stack(), color=None): 
-        self._stones = stones
+    def __init__(self, stones=False, color=None): 
+        self._stones = []
         self._color = color
     
     def steal(self, stone, color) -> Stone:
-        if not self.stones.isEmpty():
-            tmp = self._stones.pop()
-        self._stones = [stone]
+        if len(self.stones) > 0:
+            tmp = self._stones.pop(-1)
+        self._stones.append(stone)
         self._color = color
     
     def push(self, stone) -> None:
         self._stones.append(stone)
 
     def pop(self) -> Stone:
-        return self._stones.pop()
+        return self._stones.pop(-1)
     
     def isStealable(self) -> bool:
         return len(self._stones) < 2

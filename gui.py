@@ -1,6 +1,7 @@
 from Classes.backgammon import Backgammon
 from Core.ui import FPS
 from Core.colors import Colors
+from Core.sprites import Stone, Spike
 import sys, pygame, os, yaml
 
 class UI():
@@ -28,81 +29,61 @@ class UI():
         self._rolled = False
         self._mousePosition = (0,0)
         self._diceIMG = [pygame.image.load(f"{self._assetsPath}dice.png"),pygame.image.load(f"{self._assetsPath}dice-hvr.png")]
-        self._stoneIMG = [pygame.image.load(f"{self._assetsPath}stone-p1.png"),pygame.image.load(f"{self._assetsPath}stone-p2.png")]
-        self._spikeIMG = [pygame.image.load(f"{self._assetsPath}light-spike.png"),pygame.image.load(f"{self._assetsPath}dark-spike.png")]
+        self._playerIMG = [pygame.image.load(f"{self._assetsPath}PlayerTwo.png"),pygame.image.load(f"{self._assetsPath}PlayerOne.png")]
         self._diceSize = 100
-        self._stoneSize, self._stoneTile = self._stoneIMG[0].get_width(), 105
+        self._stoneSize, self._stoneTile = 75, 105
         self._splitter = 160
         self._font = pygame.font.SysFont(f"{os.getcwd()}/Assets/Fonts/NotoSans-Regular.ttf", 48)
 
+        self._stoneSprites = pygame.sprite.Group()
+        self._spikeSprites = pygame.sprite.Group()
+
     # rendering for spikes
-    def _spikes(self):
-        
+    def _spikes(self) -> None:
         # top 12 spikes
-        x = (self._res[0] //2 + self._fieldSize[0] // 2) - self._stoneTile
+        x = (self._res[0] //2 + self._fieldSize[0] //2) - self._stoneTile
         y = (self._res[1] //2 - self._fieldSize[1] // 2)
-        last = 0
+        last = Colors.White
         for index in range(12):
             shiftX = 0
             if index % 6 == 0 and index != 0:
                 shiftX = self._splitter
             x -= shiftX
-            self._screen.blit(
-                    self._spikeIMG[last], 
-                    (
-                        x,
-                        y
-                    )
-                )
-            last = 1 if last == 0 else 0
+            newSpike = Spike(last, (x,y), 0)
+            self._spikeSprites.add(newSpike)
+            last = Colors.White if last == Colors.Black else Colors.Black
             x -= self._stoneTile
-        
         # bottom 12 spikes
         x += self._stoneTile
-        y = (self._res[1] //2 + self._fieldSize[1] // 2) - self._spikeIMG[0].get_height()
+        y = (self._res[1] //2 + self._fieldSize[1] // 2) - 394
         for index in range(12, 24):
             shiftX = 0
             if index % 6 == 0 and index != 12:
                 shiftX = self._splitter
             x += shiftX
-            self._screen.blit(
-                    pygame.transform.rotate(self._spikeIMG[last], 180), 
-                    (
-                        x,
-                        y
-                    )
-                )
-            last = 1 if last == 0 else 0
+            newSpike = Spike(last, (x,y),180)
+            self._spikeSprites.add(newSpike)
+            last = Colors.White if last == Colors.Black else Colors.Black
             x += self._stoneTile
 
     # rendering for stones
-    def _stones(self):
+    def _stones(self) -> None:
         # starting position for rendering
         x = (self._res[0] //2 + self._fieldSize[0] //2) - ((self._stoneTile - self._stoneSize)//2 + self._stoneSize)
         y = self._res[1] //2 - self._fieldSize[1] // 2
-        # TMP load
-        fill = pygame.image.load(f"{self._assetsPath}fill.png")
         # Top 12 render
         for index in range(12):
             shiftX = 0
             if index % 6 == 0 and index != 0:
                 shiftX = self._splitter
             current = self._board[index]
-            img = self._stoneIMG[0] if current.color == Colors.Black else self._stoneIMG[1]
-            
             x -= shiftX
             y = self._res[1] //2 - self._fieldSize[1] // 2
             for stone in range(len(current)):
-                self._screen.blit(
-                    img, 
-                    (
-                        x,
-                        y
-                    )
-                )
+                newStone = Stone(current.color, (x,y))
+                self._stoneSprites.add(newStone)
                 y += self._stoneSize
             x -= self._stoneTile
-
         x = (self._res[0] //2 - self._fieldSize[0] //2) + (self._stoneTile - self._stoneSize)//2
         
         # Bottom 12 render
@@ -110,24 +91,45 @@ class UI():
             shiftX = 0
             if index % 6 == 0 and index != 12:
                 shiftX = self._splitter
-            current = self._board[index]
-            img = self._stoneIMG[0] if current.color == Colors.Black else self._stoneIMG[1]
-            
+            current = self._board[index]            
             x += shiftX
             y = (self._res[1] //2 + self._fieldSize[1] //2) - self._stoneSize
             for stone in range(len(current)):
-                self._screen.blit(
-                    img, 
-                    (
-                        x,
-                        y
-                    )
-                )
+                newStone = Stone(current.color, (x,y))
+                self._stoneSprites.add(newStone)
                 y -= self._stoneSize
             x += self._stoneTile
 
+    # rendering for the board
+    def _boardRnd(self) -> None:
+        border = 60
+        scale = .75
+        y = border
+        for player in self._playerIMG:
+            self._screen.blit(
+                pygame.transform.scale(player, 
+                        (
+                            player.get_width() * scale, 
+                            player.get_height() * scale
+                        )
+                    ),
+                (
+                    25,
+                    y
+                )
+            )
+            y =  border if y != border else self._res[1] - (border + player.get_height() * scale)
+        self._screen.blit(
+            self._field,
+            (
+                self._res[0]//2 - (self._fieldSize[0] // 2),
+                self._res[1]//2 - (self._fieldSize[1] // 2)
+            )
+        )
+
+
     # rendering for dice rolled numbers
-    def _rolls(self):
+    def _rolls(self) -> None:
         if len(self._currentRoll) > 0:
             lenght = len(self._currentRoll) / 2
             position = 0
@@ -141,21 +143,24 @@ class UI():
                     self._font.render(str(roll), True, self._color)
                     ,(indent[position], self._border["x"]))
                 position +=1
-        
-        self._screen.blit(
-            self._field,
-            (
-                self._res[0]//2 - (self._fieldSize[0] // 2),
-                self._res[1]//2 - (self._fieldSize[1] // 2)
-            )
-        )
 
     # rendering for dices / hover function
     def _dice(self, dice):
         self._screen.blit(dice, (self._res[0] - self._diceSize-self._border["x"], self._border["y"]))
 
+    def GUIrender(self) -> None:
+        self._boardRnd()
+        self._rolls()
+
+    def Setup(self) -> None:
+        self._spikes()
+        self._stones()
+    
     def run(self):
         fps = FPS((0,0,255))
+        self._board = self.backgammon.board
+        self.Setup()
+
         while True:
             # close event
             for event in pygame.event.get():
@@ -166,9 +171,10 @@ class UI():
             # get board state
             self._board = self.backgammon.board
             # GUI rendering
-            self._rolls()
-            self._spikes()
-            self._stones()
+            self.GUIrender()
+
+            self._spikeSprites.draw(self._screen)
+            self._stoneSprites.draw(self._screen)
             
             # FPS Counter
             fps.clock.tick(144)
