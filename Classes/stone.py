@@ -6,6 +6,7 @@ class Stone():
         self._color = color
         
         self._locationMemory = Stack()
+        self._locationMemory.push(self._location)
     
     @property    
     def location(self):

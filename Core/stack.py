@@ -1,8 +1,12 @@
 from typing import Any, List
 
 class Stack:
-    def __init__(self, start=[]):
-        self._memory = start
+    def __init__(self):
+        self._memory = []
+
+    def fill(self, list:List) -> None:
+        for item in list:
+            self._memory.append(item)
 
     def push(self, item) -> None:
         self._memory.append(item)

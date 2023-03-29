@@ -2,12 +2,12 @@ from typing import List
 from Core.colors import Colors
 from Classes.spike import Spike
 class Player:
-    def __init__(self,color:Colors, spikes=[]):
-        self._spikes = spikes
+    def __init__(self,color:Colors):
+        self._spikes = []
         self._color = color
         self._possibleMoves = []
 
-    def addSpike(self, spike:tuple()) -> None:
+    def addSpike(self, spike:int) -> None:
         self._spikes.append(spike)
     
     def move(self, moveFrom:Spike, moveTo:Spike) -> None:
