@@ -14,8 +14,8 @@ class Backgammon:
         self._moves = []
         self._dices = [Dice(), Dice()]
         self._players = [
-            Human(color=Colors.White), 
-            Human(color=Colors.Black)
+            Human(color=Colors.White),
+            Human(color=Colors.Black) 
         ]
         self.bar = Bar(self._players)
         self._spikes = self.bar.setup()
@@ -56,16 +56,20 @@ class Backgammon:
     def _getPossibleMoves(self, move) -> None:
         playerSpikes = self._turn.spikes
         moves = []
-        if self._turn == self._players[1]:
+        if self._turn.color == Colors.White:
             for spike in playerSpikes:
                 spikeTo = spike - move
                 if spikeTo > -1 and self._spikes[spikeTo].isStealable():
                     moves.append((spike ,spikeTo))
-                
+                if spikeTo > -1 and self._spikes[spikeTo].color == self._turn.color:
+                    moves.append((spike ,spikeTo))
+
         else:
             for spike in playerSpikes:
                 spikeTo = spike + move
                 if spikeTo < len(self._spikes) and self._spikes[spikeTo].isStealable():
+                    moves.append((spike ,spikeTo))
+                if spikeTo < len(self._spikes) and self._spikes[spikeTo].color == self._turn.color:
                     moves.append((spike ,spikeTo))
 
         self._turn.possibleMoves = moves
@@ -75,21 +79,42 @@ class Backgammon:
         for index in range(len(board)//2):
             left = index
             right = (len(board)-1)-index
-            print(f"C:{board[left].color} - {len(board[left].stones)} | C:{board[right].color} - {len(board[right].stones)} ")
+            print(f"[{left}]C:{board[left].color} - {len(board[left].stones)} |[{right}] C:{board[right].color} - {len(board[right].stones)} ")
 
-    # Main game cycle
+    def mainGUI(self) -> List:
+        if self._turn == None:
+            self._foreplay()
+        output = []
+        display = self._moves.copy()
+        for move in self._moves:
+            subprocess.run("clear")
+            self._getPossibleMoves(move)
+            self.RenderBoard(self._spikes)
+            print(f"Current player: {self._turn.color}")
+            print(f"Rolled: {display}")
+            output = self._turn.getMove()
+            print(output[-1])
+            if output[1] != None:
+                self._stolen.append(output[1])
+            print(self._stolen)
+            display.pop(0)
+        self._turn = output[0]
+        return self._spikes
+    
+    # Main game cycle for shell
     def main(self):
         self._foreplay()
-        for _ in range(5):
+        for _ in range(15):
             output = []
             display = self._moves.copy()
             for move in self._moves:
-                subprocess.run("clear")
+                #subprocess.run("clear")
                 self._getPossibleMoves(move)
                 self.RenderBoard(self._spikes)
                 print(f"Current player: {self._turn.color}")
                 print(f"Rolled: {display}")
                 output = self._turn.getMove()
+                print(output[-1])
                 if output[1] != None:
                     self._stolen.append(output[1])
                 print(self._stolen)

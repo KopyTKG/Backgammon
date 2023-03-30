@@ -6,6 +6,8 @@ class Human(Player):
 
     def getMove(self) -> Player:
         index = 1
+        if len(self._possibleMoves) == 0:
+            return [self._opositePlayer, None]
         for move in self.possibleMoves:
             print(f"{index}) {move}")
             index += 1

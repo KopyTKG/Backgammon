@@ -13,14 +13,13 @@ class UI():
             self._config = yaml.safe_load(opened)
 
         self.backgammon = Backgammon()
-        self.backgammon.main()
         self._board = []
         self._bg = self._config["background"][0], self._config["background"][1], self._config["background"][2]
-        self._flags = self._modes["bordless"]
+        self._flags =  None#self._modes["bordless"]
         self._res = (self._config["resolution"][0],self._config["resolution"][1])
         self._color = (125,175,0)
         self._border = {"x": 20, "y":20}
-        self._screen = pygame.display.set_mode(self._res, flags=self._flags, vsync=0)
+        self._screen = pygame.display.set_mode(self._res, vsync=0)
         self._screen.fill(self._bg)
         self._currentRoll = []
         self._assetsPath = f"{os.getcwd()}/Assets/Images/"
@@ -158,9 +157,8 @@ class UI():
     
     def run(self):
         fps = FPS((0,0,255))
-        self._board = self.backgammon.board
+        self._board = self.backgammon.mainGUI()
         self.Setup()
-
         while True:
             # close event
             for event in pygame.event.get():
@@ -191,6 +189,7 @@ class UI():
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
                     if pygame.mouse.get_pressed()[0] and not self._rolled:
                         self.backgammon.diceRoll()
+                        self.backgammon.mainGUI()
                         self._currentRoll = self.backgammon.moves
                         self._rolled = True
                 else:

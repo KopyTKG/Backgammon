@@ -12,9 +12,10 @@ class Player:
     def addSpike(self, spike:int) -> None:
         self._spikes.append(spike)
     
-    def move(self, moveFrom:Spike, moveTo:Spike) -> None:
+    def move(self, moveFrom:Spike, moveTo:Spike) -> List:
         steal = self._opositePlayer.color
-        stone = stolen = None
+        stone = None
+        stolen = None
 
         # get moving stone (remove spike if empty)
         if len(self._board[moveFrom].stones) > 1:
