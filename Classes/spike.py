@@ -9,10 +9,12 @@ class Spike:
         self._color = color
     
     def steal(self, stone, color) -> Stone:
+        stone = None
         if len(self.stones) > 0:
-            tmp = self._stones.pop()
+            stone = self._stones.pop()
         self._stones.push(stone)
         self._color = color
+        return stone
     
     def push(self, stone) -> None:
         self._stones.push(stone)
